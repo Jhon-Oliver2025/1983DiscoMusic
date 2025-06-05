@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toca Disco 1983</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Adicionar link para ícones, por exemplo, Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Adicionar link para o favicon -->
+    <link rel="icon" href="caminho/para/seu/favicon.ico" type="image/x-icon">
+    <!-- Ou se for um PNG -->
+    <!-- <link rel="icon" href="caminho/para/seu/favicon.png" type="image/png"> -->
+</head>
+<body>
+    <div class="container">
+        <!-- Removemos a primeira tag main-album-cover duplicada -->
+        <!-- <img id="main-album-cover" src="" alt="Capa do Álbum Principal"> -->
+
+        <!-- Imagem principal no topo - Agora sempre CapaPrincipaltopo.jpg -->
+        <!-- Movemos esta tag para o topo do container -->
+        <img id="main-album-cover" src="assets/CapaPrincipaltopo.jpg" alt="Imagem Principal do Toca Disco">
+
+        <!-- Área para o toca-discos usando a imagem -->
+        <div class="turntable-area">
+            <!-- Altere o src para o nome do arquivo da nova imagem da vitrola que você salvou -->
+            <img id="turntable-base" src="assets/vitrolabase.png" alt="Base do Toca Disco">
+            <img id="current-album-art" src="" alt="Capa do Álbum Girando">
+        </div>
+
+        <div class="header">
+            <img src="assets/logo1983Disco.png" alt="Logo 1983 Disco" class="header-logo">
+            <span class="power">POWER <span class="power-indicator"></span></span>
+        </div>
+
+        <!-- Área de informações da música e progresso -->
+        <div class="song-info">
+            <h2 id="current-song-title">No Track Playing</h2>
+            <div class="time-display">
+                <span id="current-time">00:00</span> / <span id="duration">00:00</span>
+            </div>
+            <!-- A barra de progresso fica aqui, abaixo do tempo -->
+            <input type="range" id="progress-bar" value="0" min="0" max="100" step="0.01">
+        </div>
+
+        <!-- Controles do player -->
+        <div class="controls">
+            <!-- O elemento audio ficará oculto, usaremos controles customizados -->
+            <audio id="audio-player"></audio>
+
+            <div class="player-buttons">
+                <button id="prev-button"><i class="fas fa-step-backward"></i></button>
+                <button id="play-pause-button"><i class="fas fa-play"></i></button>
+                <button id="stop-button"><i class="fas fa-stop"></i></button>
+                <button id="next-button"><i class="fas fa-step-forward"></i></button>
+            </div>
+
+            <!-- Removemos o controle de volume conforme solicitado -->
+            <!--
+            <div class="volume-control">
+                <label for="volume-slider">VOLUME</label>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
+                <span id="volume-value">50%</span>
+            </div>
+            -->
+        </div>
+
+        <!-- Área da playlist -->
+        <div class="playlist-area">
+            <h2>PLAYLIST <span id="playlist-count">0 músicas</span></h2>
+            <ul id="playlist">
+                <!-- As músicas serão listadas aqui pelo JavaScript -->
+            </ul>
+            <p class="empty-playlist-message">Nenhuma música adicionada.<br>Clique em "Adicionar Músicas" para começar.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
