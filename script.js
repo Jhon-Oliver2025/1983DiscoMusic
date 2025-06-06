@@ -25,17 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Lista de músicas com seus caminhos e capas
     let playlist = [
-        { title: "Meu tipo de Garota 15 Anos", src: "assets/1 - Meu tipo de Garota 15 Anos.mp3", albumArt: "assets/1 - Meu tipo de Garota 15 Anos.png" },
-        { title: "Meu tipo de Herói", src: "assets/2 - Meu tipo de Herói.mp3", albumArt: "assets/2 - Meu tipo de Herói.png" },
-        { title: "Meu tipo de Princesa", src: "assets/3 - Meu tipo de Princesa.mp3", albumArt: "assets/3 - Meu tipo de Princesa.png" },
-        { title: "Irmandade Eterna", src: "assets/4 - Irmandade Eterna.mp3", albumArt: "assets/4 - Irmandade Eterna.png" },
-        { title: "Um lugar chamado Sonia", src: "assets/5 - Um lugar chamado Sonia.mp3", albumArt: "assets/5 - Um lugar chamado Sonia.png" },
-        { title: "Manolos", src: "assets/6 - Manolos.mp3", albumArt: "assets/6 - Manolos.png" },
-        { title: "Obrigado Perdão e Cuida", src: "assets/7 - Obrigado Perdão e Cuida.mp3", albumArt: "assets/7 - Obrigado Perdão e Cuida.png" },
-        { title: "Persistindo em Fé", src: "assets/8 - Persistindo em Fé.mp3", albumArt: "assets/8 - Persistindo em Fé.png" },
-        { title: "Pedro Bryan Bônus", src: "assets/9 - Pedro Bryan Bônus.mp3", albumArt: "assets/9 - Pedro Bryan Bônus.png" },
-        { title: "Pedro James Brown Bõnus", src: "assets/10 - Pedro James Brown Bõnus.mp3", albumArt: "assets/10 - Pedro James Brown Bõnus.png" }
-    ]; // <-- Adicionado o fechamento correto do array aqui
+        { title: "Meu tipo de Garota 15 Anos", src: "Assets/1 - Meu tipo de Garota 15 Anos.mp3", albumArt: "Assets/1 - Meu tipo de Garota 15 Anos.png" },
+        { title: "Meu tipo de Herói", src: "Assets/2 - Meu tipo de Herói.mp3", albumArt: "Assets/2 - Meu tipo de Herói.png" },
+        { title: "Meu tipo de Princesa", src: "Assets/3 - Meu tipo de Princesa.mp3", albumArt: "Assets/3 - Meu tipo de Princesa.png" },
+        { title: "Irmandade Eterna", src: "Assets/4 - Irmandade Eterna.mp3", albumArt: "Assets/4 - Irmandade Eterna.png" },
+        { title: "Um lugar chamado Sonia", src: "Assets/5 - Um lugar chamado Sonia.mp3", albumArt: "Assets/5 - Um lugar chamado Sonia.png" },
+        { title: "Manolos", src: "Assets/6 - Manolos.mp3", albumArt: "Assets/6 - Manolos.png" },
+        { title: "Obrigado Perdão e Cuida", src: "Assets/7 - Obrigado Perdão e Cuida.mp3", albumArt: "Assets/7 - Obrigado Perdão e Cuida.png" },
+        { title: "Persistindo em Fé", src: "Assets/8 - Persistindo em Fé.mp3", albumArt: "Assets/8 - Persistindo em Fé.png" },
+        { title: "Pedro Bryan Bônus", src: "Assets/9 - Pedro Bryan Bônus.mp3", albumArt: "Assets/9 - Pedro Bryan Bônus.png" },
+        { title: "Pedro James Brown Bõnus", src: "Assets/10 - Pedro James Brown Bõnus.mp3", albumArt: "Assets/10 - Pedro James Brown Bõnus.png" }
+    ];
 
     // Função para formatar o tempo (ex: 03:45)
     function formatTime(seconds) {
