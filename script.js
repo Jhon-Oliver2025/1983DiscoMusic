@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para exibir as capas dos álbuns
     function displayAlbums() {
+        console.log("displayAlbums: Exibindo álbuns."); // Log
         albumListElement.innerHTML = ''; // Limpa a lista atual
         albums.forEach((album, index) => {
             const albumItem = document.createElement('div');
@@ -115,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Adiciona evento de clique para selecionar o álbum
             albumItem.addEventListener('click', () => {
+                console.log(`Album clicked: ${album.name} (Index: ${index})`); // Log
                 selectAlbum(index);
             });
 
@@ -124,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para selecionar um álbum e exibir sua playlist
     function selectAlbum(albumIndex) {
+        console.log(`selectAlbum: Selecionando álbum com índice ${albumIndex}`); // Log
         // Pausa a música atual se houver
         audioPlayer.pause();
         if (currentAlbumArtElement) {
@@ -138,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTimeElement.textContent = "00:00"; // Reseta o tempo
         durationElement.textContent = "00:00"; // Reseta a duração
         progressBar.value = 0; // Reseta a barra de progresso
+        progressBar.max = 0; // Reseta o max da barra também
 
 
         // Atualiza as imagens principais para as do álbum selecionado
@@ -172,11 +176,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para carregar e (opcionalmente) tocar uma faixa específica
     function loadTrack(index, autoPlay = true) {
+        console.log(`loadTrack: Carregando faixa índice ${index}, autoPlay: ${autoPlay}`); // Log
         // Usa a lista de tracks do álbum atualmente selecionado
         if (currentAlbum && index >= 0 && index < currentAlbum.tracks.length) {
             currentTrackIndex = index;
             const track = currentAlbum.tracks[currentTrackIndex];
+
+            // Define a fonte do áudio. Isso pode disparar eventos de carregamento.
             audioPlayer.src = track.src;
+            console.log(`loadTrack: src definido para ${track.src}`); // Log
+            console.log(`loadTrack: currentTime ANTES de load(): ${audioPlayer.currentTime}`); // Log adicionado
             currentSongTitleElement.textContent = track.title;
 
             // Define a capa giratória menor como a bolacha do álbum (garante que seja a do álbum atual)
@@ -195,20 +204,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Carrega a música. O autoplay é controlado pela função playTrack/togglePlayPause
+            // Carrega a música.
             audioPlayer.load(); // Garante que o áudio seja carregado para obter a duração
+            console.log("loadTrack: audioPlayer.load() chamado."); // Log
+            console.log(`loadTrack: currentTime APÓS load(): ${audioPlayer.currentTime}`); // Log adicionado
 
+            // Se autoPlay for true, tentamos tocar imediatamente.
+            // A função playTrack agora lida com a espera pelo 'canplay' ou a Promise do play().
             if (autoPlay) {
-                // A reprodução é iniciada pela função playTrack ou togglePlayPause
-                // Não chamamos audioPlayer.play() diretamente aqui
+                console.log("loadTrack: autoPlay é true, chamando playTrack()."); // Log
+                playTrack();
             } else {
                  // Garante que a bolacha não esteja girando se não for tocar automaticamente
                  if (currentAlbumArtElement) {
                     currentAlbumArtElement.classList.remove('spinning');
                  }
+                 console.log("loadTrack: autoPlay é false."); // Log
             }
+
         } else {
-            console.error("Índice de faixa inválido ou nenhum álbum selecionado.");
+            console.error("loadTrack: Índice de faixa inválido ou nenhum álbum selecionado."); // Log
             // Opcional: Limpar a playlist ou mostrar mensagem
             updatePlaylistDisplay(); // Limpa a lista se o álbum for inválido
         }
@@ -216,23 +231,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para tocar a música atual
     function playTrack() {
-        if (audioPlayer.src) { // Verifica se há uma fonte de áudio carregada
-            audioPlayer.play();
-            playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Muda para ícone de pause
-            if (currentAlbumArtElement) {
-                currentAlbumArtElement.classList.add('spinning'); // Adiciona a animação de giro
+        console.log("playTrack: Tentando tocar..."); // Log
+        // Verifica se há uma fonte de áudio carregada
+        if (audioPlayer.src) {
+            // Tenta tocar e lida com a Promise retornada por play()
+            const playPromise = audioPlayer.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Playback started successfully
+                    console.log("playTrack: Playback iniciado com sucesso."); // Log
+                    playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Muda para ícone de pause
+                    if (currentAlbumArtElement) {
+                        currentAlbumArtElement.classList.add('spinning'); // Adiciona a animação de giro
+                    }
+                }).catch(error => {
+                    // Handle potential errors, e.g., user gesture requirement
+                    console.error("playTrack: Erro ao tentar tocar a música:", error); // Log
+                    // Pode ser necessário adicionar uma mensagem para o usuário interagir
+                    playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Volta para o ícone de play
+                    if (currentAlbumArtElement) {
+                        currentAlbumArtElement.classList.remove('spinning'); // Remove a animação de giro
+                    }
+                    // Se o erro for relacionado a user gesture, a música não tocará automaticamente.
+                    // O usuário precisará clicar no botão play.
+                });
+            } else {
+                 // Fallback para navegadores mais antigos que não retornam Promise
+                 console.log("playTrack: play() não retornou Promise (navegador antigo?)."); // Log
+                 playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Assume que vai tocar
+                 if (currentAlbumArtElement) {
+                    currentAlbumArtElement.classList.add('spinning'); // Assume que vai girar
+                 }
             }
-        } else if (currentAlbum && currentAlbum.tracks.length > 0) {
-             // Se não há fonte mas há um álbum selecionado, carrega e toca a primeira faixa
-             loadTrack(0, true); // Carrega a primeira faixa e tenta tocar
-             // playTrack será chamada novamente após loadTrack carregar a fonte
         } else {
-             console.warn("Nenhuma faixa carregada ou álbum selecionado para tocar.");
+             console.warn("playTrack: Nenhuma fonte de áudio definida."); // Log
+             // Opcional: Tentar carregar o primeiro track se nenhum estiver carregado?
+             // Isso já é tratado em togglePlayPause.
         }
     }
 
     // Função para pausar a música atual
     function pauseTrack() {
+        console.log("pauseTrack: Pausando..."); // Log
         audioPlayer.pause();
         playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Volta para ícone de play
         if (currentAlbumArtElement) {
@@ -242,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para parar a música
     function stopTrack() {
+        console.log("stopTrack: Parando..."); // Log
         audioPlayer.pause();
         audioPlayer.currentTime = 0; // Volta para o início
         playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Volta para ícone de play
@@ -265,51 +307,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para tocar a música anterior
     function playPreviousSong() {
-        if (!currentAlbum || currentAlbum.tracks.length === 0) return; // Não faz nada se não houver álbum ou músicas
+        console.log("playPreviousSong: Tentando tocar faixa anterior."); // Log
+        if (!currentAlbum || currentAlbum.tracks.length === 0) {
+            console.warn("playPreviousSong: Nenhum álbum ou músicas disponíveis."); // Log
+            return; // Não faz nada se não houver álbum ou músicas
+        }
         let newIndex = currentTrackIndex - 1;
         if (newIndex < 0) {
             newIndex = currentAlbum.tracks.length - 1; // Volta para a última faixa
         }
+        console.log(`playPreviousSong: Carregando índice ${newIndex}.`); // Log
         loadTrack(newIndex, true); // Carrega e toca a faixa anterior
-        playTrack(); // Garante que a reprodução comece
     }
 
     // Função para tocar a próxima música
     function playNextSong() {
-        if (!currentAlbum || currentAlbum.tracks.length === 0) return; // Não faz nada se não houver álbum ou músicas
+        console.log("playNextSong: Tentando tocar próxima faixa."); // Log
+        if (!currentAlbum || currentAlbum.tracks.length === 0) {
+             console.warn("playNextSong: Nenhum álbum ou músicas disponíveis."); // Log
+             return; // Não faz nada se não houver álbum ou músicas
+        }
         let newIndex = currentTrackIndex + 1;
         if (newIndex >= currentAlbum.tracks.length) { // Verifica se chegou ao fim do álbum
             newIndex = 0; // Volta para a primeira faixa do álbum
         }
+        console.log(`playNextSong: Carregando índice ${newIndex}.`); // Log
         loadTrack(newIndex, true); // Carrega e toca a próxima faixa
-        playTrack(); // Garante que a reprodução comece
     }
 
     // Função para alternar entre tocar/pausar
     function togglePlayPause() {
+        console.log("togglePlayPause: Chamado."); // Log
         if (!currentAlbum) { // Adiciona verificação se um álbum foi selecionado
-            console.warn("Nenhum álbum selecionado para tocar.");
+            console.warn("togglePlayPause: Nenhum álbum selecionado para tocar."); // Log
             // Opcional: Mostrar uma mensagem para o usuário selecionar um álbum
             return; // Sai da função se nenhum álbum estiver selecionado
         }
 
         if (audioPlayer.paused || !audioPlayer.src) { // Se pausado ou sem fonte, tenta tocar
+            console.log("togglePlayPause: Player pausado ou sem src. Tentando tocar."); // Log
             // Se nenhum track foi carregado ainda para o álbum atual, carrega o primeiro
             if (currentTrackIndex === -1 && currentAlbum.tracks.length > 0) {
+                 console.log("togglePlayPause: currentTrackIndex é -1, carregando primeiro track."); // Log
                  loadTrack(0, true); // Carrega a primeira faixa e toca
             } else if (currentTrackIndex !== -1) {
                  // Se um track já foi carregado, apenas continua de onde parou
+                 console.log("togglePlayPause: currentTrackIndex válido, chamando playTrack()."); // Log
                  playTrack();
             } else {
-                 console.warn("Álbum selecionado não possui faixas.");
+                 console.warn("togglePlayPause: Álbum selecionado não possui faixas."); // Log
             }
         } else { // Se tocando, pausa
+            console.log("togglePlayPause: Player tocando. Pausando."); // Log
             pauseTrack();
         }
     }
 
     // Função para atualizar a exibição da playlist (agora exibe as faixas do álbum selecionado)
     function updatePlaylistDisplay() {
+        console.log("updatePlaylistDisplay: Atualizando exibição da playlist."); // Log
         playlistElement.innerHTML = ''; // Limpa a exibição atual da playlist
         if (currentAlbum && currentAlbum.tracks.length > 0) {
             emptyPlaylistMessage.style.display = 'none'; // Esconde a mensagem de playlist vazia
@@ -320,8 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 listItem.innerHTML = `<img src="${track.trackArt}" alt="Capa da Música"> <span>${track.title}</span>`;
 
                 listItem.addEventListener('click', () => {
+                    console.log(`Playlist item clicked: ${track.title} (Index: ${index})`); // Log
                     loadTrack(index, true); // Carrega e toca a faixa clicada
-                    playTrack(); // Garante que a reprodução comece
                 });
 
                 playlistElement.appendChild(listItem);
@@ -329,6 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
             playlistCountElement.textContent = `${currentAlbum.tracks.length} música${currentAlbum.tracks.length > 1 ? 's' : ''}`;
         } else {
             // Se nenhum álbum selecionado ou álbum sem faixas
+            console.log("updatePlaylistDisplay: Nenhum álbum selecionado ou sem faixas. Limpando playlist."); // Log
             playlistElement.innerHTML = ''; // Garante que a lista esteja vazia
             emptyPlaylistMessage.style.display = 'block'; // Mostra a mensagem de playlist vazia
             playlistCountElement.textContent = '0 músicas';
@@ -364,14 +421,197 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Elemento com ID 'next-button' não encontrado.");
     }
 
-    // ... existing code ...
+    // --- Listeners para o Audio Player ---
+
+    // Evento 'loadedmetadata' para obter a duração da música assim que os metadados estiverem disponíveis
+    audioPlayer.addEventListener('loadedmetadata', () => {
+        console.log(`loadedmetadata: Duração disponível. audioPlayer.duration: ${audioPlayer.duration}`); // Log
+        if (!isNaN(audioPlayer.duration) && isFinite(audioPlayer.duration)) {
+            durationElement.textContent = formatTime(audioPlayer.duration);
+            progressBar.max = audioPlayer.duration; // Define o valor máximo da barra de progresso como a duração total
+            progressBar.value = audioPlayer.currentTime; // <-- Adiciona esta linha para atualizar a barra no início
+            console.log(`loadedmetadata: Duração formatada: ${durationElement.textContent}, progressBar.max: ${progressBar.max}, progressBar.value: ${progressBar.value}`); // Log atualizado
+        } else {
+            console.warn("loadedmetadata: Duração inválida ou infinita."); // Log
+            durationElement.textContent = "00:00"; // Ou algum indicador de duração desconhecida
+            progressBar.max = 0;
+        }
+    });
+
+    // Evento 'timeupdate' para atualizar o tempo atual e a barra de progresso
+    audioPlayer.addEventListener('timeupdate', () => {
+        // console.log(`timeupdate: currentTime: ${audioPlayer.currentTime}, duration: ${audioPlayer.duration}, isSeeking: ${isSeeking}`); // Log mais detalhado - Revertido para menos verboso
+        currentTimeElement.textContent = formatTime(audioPlayer.currentTime);
+        // Atualiza a barra de progresso APENAS se o usuário não estiver arrastando
+        // Adiciona verificação se a duração é válida antes de atualizar a barra
+        if (!isSeeking && !isNaN(audioPlayer.duration) && isFinite(audioPlayer.duration) && audioPlayer.duration > 0) {
+            progressBar.value = audioPlayer.currentTime;
+        } else if (!isSeeking) {
+             // Log para entender por que a barra não está atualizando quando não está buscando - Revertido
+             // console.warn(`timeupdate: Barra de progresso não atualizada. isSeeking: ${isSeeking}, duration: ${audioPlayer.duration}`);
+        }
+    });
+
+    // Evento 'ended' para tocar a próxima música quando a atual terminar
+    audioPlayer.addEventListener('ended', () => {
+        console.log(`ended: Música terminou. Chamando playNextSong().`); // Log atualizado
+        playNextSong();
+    });
+
+    // Evento 'error' para capturar erros de áudio
+    audioPlayer.addEventListener('error', (e) => {
+        console.error("Audio Error:", e); // Log o evento de erro
+        switch (e.target.error.code) {
+            case MediaError.MEDIA_ERR_ABORTED:
+                console.error('Audio playback aborted.');
+                break;
+            case MediaError.MEDIA_ERR_NETWORK:
+                console.error('A network error caused the audio download to fail.');
+                break;
+            case MediaError.MEDIA_ERR_DECODE:
+                console.error('The audio playback was aborted due to a corruption problem or because the audio used features your browser did not support.');
+                break;
+            case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                console.error('The audio could not be loaded, either because the server or network failed or because the format is not supported.');
+                break;
+            default:
+                console.error('An unknown audio error occurred.');
+                break;
+        }
+        // Opcional: Mostrar uma mensagem de erro para o usuário
+        currentSongTitleElement.textContent = "Erro ao carregar música";
+        playPauseButton.innerHTML = '<i class="fas fa-play"></i>';
+        if (currentAlbumArtElement) {
+            currentAlbumArtElement.classList.remove('spinning');
+        }
+    });
+
+    // Evento 'canplay' - disparado quando o navegador pode começar a reproduzir
+    audioPlayer.addEventListener('canplay', () => {
+        console.log("canplay: Áudio pronto para começar a tocar."); // Log
+        // Podemos adicionar lógica aqui se necessário, mas playTrack já lida com a Promise
+    });
+
+     // Evento 'canplaythrough' - disparado quando o navegador estima que pode reproduzir até o fim
+    audioPlayer.addEventListener('canplaythrough', () => {
+        console.log("canplaythrough: Áudio pronto para tocar até o fim."); // Log
+        // Este evento é mais confiável para auto-play, mas 'canplay' geralmente é suficiente
+    });
+
+
+    // --- Listeners para a Barra de Progresso ---
+
+    // Evento 'mousedown' ou 'touchstart' na barra de progresso (quando o usuário começa a arrastar)
+    progressBar.addEventListener('mousedown', () => {
+        console.log("progressBar mousedown: Iniciando seek."); // Log
+        isSeeking = true;
+        wasPlayingBeforeSeek = !audioPlayer.paused; // Salva se estava tocando
+        pauseTrack(); // Pausa a música enquanto arrasta
+    });
+    // Adiciona também para dispositivos touch
+    progressBar.addEventListener('touchstart', () => {
+        console.log("progressBar touchstart: Iniciando seek."); // Log
+        isSeeking = true;
+        wasPlayingBeforeSeek = !audioPlayer.paused; // Salva se estava tocando
+        pauseTrack(); // Pausa a música enquanto arrasta
+    });
+
+
+    // Evento 'input' na barra de progresso (enquanto o usuário está arrastando)
+    // Atualiza apenas o tempo exibido, não a posição da música ainda
+    progressBar.addEventListener('input', () => {
+        // console.log(`progressBar input: value = ${progressBar.value}`); // Log - pode ser verboso
+        currentTimeElement.textContent = formatTime(progressBar.value);
+    });
+
+    // Evento 'mouseup' ou 'touchend' na barra de progresso (quando o usuário solta)
+    progressBar.addEventListener('mouseup', () => {
+        console.log(`progressBar mouseup: Finalizando seek. Tentando definir currentTime para ${progressBar.value}`); // Log
+        isSeeking = false;
+        audioPlayer.currentTime = progressBar.value; // Define a posição da música para o valor da barra
+        console.log(`progressBar mouseup: currentTime definido para ${audioPlayer.currentTime}`); // Log para confirmar
+        if (wasPlayingBeforeSeek) {
+            console.log("progressBar mouseup: Estava tocando antes, tentando retomar play com delay."); // Log adicionado
+            // Adiciona um pequeno delay antes de tentar tocar
+            setTimeout(() => {
+                 // Tenta tocar e lida com a Promise retornada por play()
+                const playPromise = audioPlayer.play();
+                 if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log("progressBar mouseup: Playback retomado com sucesso após seek (com delay)."); // Log adicionado
+                        playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Muda para ícone de pause
+                        if (currentAlbumArtElement) {
+                            currentAlbumArtElement.classList.add('spinning'); // Adiciona a animação de giro
+                        }
+                    }).catch(error => {
+                        console.error("progressBar mouseup: Erro ao tentar retomar play após seek (com delay):", error); // Log adicionado
+                        playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Volta para o ícone de play
+                        if (currentAlbumArtElement) {
+                            currentAlbumArtElement.classList.remove('spinning'); // Remove a animação de giro
+                        }
+                    });
+                } else {
+                     // Fallback para navegadores mais antigos
+                     console.log("progressBar mouseup: play() não retornou Promise (navegador antigo?) (com delay)."); // Log adicionado
+                     playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Assume que vai tocar
+                     if (currentAlbumArtElement) {
+                        currentAlbumArtElement.classList.add('spinning'); // Assume que vai girar
+                     }
+                }
+            }, 50); // Pequeno delay de 50ms adicionado
+        } else {
+             console.log("progressBar mouseup: Não estava tocando antes."); // Log
+        }
+    });
+     // Adiciona também para dispositivos touch
+    progressBar.addEventListener('touchend', () => {
+        console.log(`progressBar touchend: Finalizando seek. Definindo currentTime para ${progressBar.value}`); // Log
+        isSeeking = false;
+        audioPlayer.currentTime = progressBar.value; // Define a posição da música para o valor da barra
+        console.log(`progressBar touchend: currentTime definido para ${audioPlayer.currentTime}`); // Log para confirmar
+        if (wasPlayingBeforeSeek) {
+            console.log("progressBar touchend: Estava tocando antes, tentando retomar play com delay."); // Log adicionado
+             // Adiciona um pequeno delay antes de tentar tocar
+            setTimeout(() => {
+                // Tenta tocar e lida com a Promise retornada por play()
+                const playPromise = audioPlayer.play();
+                 if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log("progressBar touchend: Playback retomado com sucesso após seek (com delay)."); // Log adicionado
+                        playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Muda para ícone de pause
+                        if (currentAlbumArtElement) {
+                            currentAlbumArtElement.classList.add('spinning'); // Adiciona a animação de giro
+                        }
+                    }).catch(error => {
+                        console.error("progressBar touchend: Erro ao tentar retomar play após seek (com delay):", error); // Log adicionado
+                        playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Volta para o ícone de play
+                        if (currentAlbumArtElement) {
+                            currentAlbumArtElement.classList.remove('spinning'); // Remove a animação de giro
+                        }
+                    });
+                } else {
+                     // Fallback para navegadores mais antigos
+                     console.log("progressBar touchend: play() não retornou Promise (navegador antigo?) (com delay)."); // Log adicionado
+                     playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Assume que vai tocar
+                     if (currentAlbumArtElement) {
+                        currentAlbumArtElement.classList.add('spinning'); // Assume que vai girar
+                     }
+                }
+            }, 50); // Pequeno delay de 50ms adicionado
+        } else {
+             console.log("progressBar touchend: Não estava tocando antes."); // Log
+        }
+    });
+
 
     // --- Inicialização ---
 
     // Ao carregar a página, exibe a lista de álbuns para seleção
+    console.log("DOMContentLoaded: Exibindo álbuns na inicialização."); // Log
     displayAlbums();
 
     // A playlist é exibida vazia inicialmente, pois nenhum álbum foi selecionado
+    console.log("DOMContentLoaded: Atualizando exibição da playlist na inicialização."); // Log
     updatePlaylistDisplay(); // Chama para mostrar a mensagem de playlist vazia
 
     // A primeira faixa não é carregada automaticamente ao carregar a página.
@@ -379,4 +619,4 @@ document.addEventListener('DOMContentLoaded', () => {
     //     loadTrack(0, false); // REMOVIDO
     // }
 
-});
+}); // Fim do DOMContentLoaded
