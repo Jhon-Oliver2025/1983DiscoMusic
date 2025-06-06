@@ -19,13 +19,15 @@
 
         <!-- Imagem principal no topo - Agora sempre CapaPrincipaltopo.jpg -->
         <!-- Movemos esta tag para o topo do container -->
-        <img id="main-album-cover" src="Assets/CapaPrincipaltopo.jpg" alt="Imagem Principal do Toca Disco">
+        <!-- Define a imagem padrão para o topo -->
+        <img id="main-album-cover" src="Assets/CapaPRINCIPAL.png" alt="Imagem Principal do Toca Disco">
 
         <!-- Área para o toca-discos usando a imagem -->
         <div class="turntable-area">
             <!-- Altere o src para o nome do arquivo da nova imagem da vitrola que você salvou -->
-            <img id="turntable-base" src="Assets/vitrolabase.png" alt="Base do Toca Disco">
-            <img id="current-album-art" src="" alt="Capa do Álbum Girando">
+            <img id="turntable-base" src="Assets/vitrolabase_nova.png" alt="Base do Toca Disco">
+            <!-- Define a imagem padrão para a bolacha -->
+            <img id="current-album-art" src="Assets/BolachaPRINCIPAL.png" alt="Capa do Álbum Girando">
         </div>
 
         <div class="header">
@@ -65,7 +67,16 @@
             -->
         </div>
 
-        <!-- Área da playlist -->
+        <!-- Nova Área para Seleção de Álbuns -->
+        <div class="album-selection-area">
+            <h2>SELECIONE UM ÁLBUM</h2>
+            <div id="album-list" class="album-list">
+                <!-- As capas dos álbuns serão listadas aqui pelo JavaScript -->
+            </div>
+        </div>
+
+        <!-- Área da playlist (inicialmente oculta ou vazia) -->
+        <!-- Removido style="display: none;" para que fique visível -->
         <div class="playlist-area">
             <h2>PLAYLIST <span id="playlist-count">0 músicas</span></h2>
             <ul id="playlist">

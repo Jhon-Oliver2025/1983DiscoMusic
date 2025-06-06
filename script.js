@@ -18,23 +18,72 @@ document.addEventListener('DOMContentLoaded', () => {
     const durationElement = document.getElementById('duration'); // Variável corrigida
     const emptyPlaylistMessage = document.querySelector('.empty-playlist-message');
     const progressBar = document.getElementById('progress-bar'); // Referência à barra de progresso
+    const albumListElement = document.getElementById('album-list'); // Referência à div onde as capas dos álbuns serão mostradas
+    const albumSelectionArea = document.querySelector('.album-selection-area'); // Referência à área de seleção de álbuns
+    const playlistArea = document.querySelector('.playlist-area'); // Referência à área da playlist
 
     let currentTrackIndex = -1; // Índice da faixa atualmente tocando
     let isSeeking = false; // Flag para saber se o usuário está arrastando a barra
     let wasPlayingBeforeSeek = false; // Nova flag para lembrar o estado antes de arrastar
+    let currentAlbum = null; // Variável para armazenar o álbum atualmente selecionado
 
-    // Lista de músicas com seus caminhos e capas
-    let playlist = [
-        { title: "Meu tipo de Garota 15 Anos", src: "Assets/1 - Meu tipo de Garota 15 Anos.mp3", albumArt: "Assets/1 - Meu tipo de Garota 15 Anos.png" },
-        { title: "Meu tipo de Herói", src: "Assets/2 - Meu tipo de Herói.mp3", albumArt: "Assets/2 - Meu tipo de Herói.png" },
-        { title: "Meu tipo de Princesa", src: "Assets/3 - Meu tipo de Princesa.mp3", albumArt: "Assets/3 - Meu tipo de Princesa.png" },
-        { title: "Irmandade Eterna", src: "Assets/4 - Irmandade Eterna.mp3", albumArt: "Assets/4 - Irmandade Eterna.png" },
-        { title: "Um lugar chamado Sonia", src: "Assets/5 - Um lugar chamado Sonia.mp3", albumArt: "Assets/5 - Um lugar chamado Sonia.png" },
-        { title: "Manolos", src: "Assets/6 - Manolos.mp3", albumArt: "Assets/6 - Manolos.png" },
-        { title: "Obrigado Perdão e Cuida", src: "Assets/7 - Obrigado Perdão e Cuida.mp3", albumArt: "Assets/7 - Obrigado Perdão e Cuida.png" },
-        { title: "Persistindo em Fé", src: "Assets/8 - Persistindo em Fé.mp3", albumArt: "Assets/8 - Persistindo em Fé.png" },
-        { title: "Pedro Bryan Bônus", src: "Assets/9 - Pedro Bryan Bônus.mp3", albumArt: "Assets/9 - Pedro Bryan Bônus.png" },
-        { title: "Pedro James Brown Bõnus", src: "Assets/10 - Pedro James Brown Bõnus.mp3", albumArt: "Assets/10 - Pedro James Brown Bõnus.png" }
+    // --- Nova estrutura de dados: Álbuns com suas músicas e imagens ---
+    const albums = [
+        {
+            name: "Meu Caminho",
+            coverImg: "Assets/MeuCaminhoIA/capadiscoIA.png", // Capa para seleção
+            bolachaImg: "Assets/MeuCaminhoIA/bolachaia.png", // Imagem para a vitrola giratória
+            topoImg: "Assets/MeuCaminhoIA/TopoIA.png",     // Imagem para o topo
+            tracks: [
+                { title: "Meu tipo de Garota 15 Anos", src: "Assets/MeuCaminhoIA/1 - Meu tipo de Garota 15 Anos.mp3", trackArt: "Assets/MeuCaminhoIA/1 - Meu tipo de Garota 15 Anos.png" },
+                { title: "Meu tipo de Herói", src: "Assets/MeuCaminhoIA/2 - Meu tipo de Herói.mp3", trackArt: "Assets/MeuCaminhoIA/2 - Meu tipo de Herói.png" },
+                { title: "Meu tipo de Princesa", src: "Assets/MeuCaminhoIA/3 - Meu tipo de Princesa.mp3", trackArt: "Assets/MeuCaminhoIA/3 - Meu tipo de Princesa.png" },
+                { title: "Irmandade Eterna", src: "Assets/MeuCaminhoIA/4 - Irmandade Eterna.mp3", trackArt: "Assets/MeuCaminhoIA/4 - Irmandade Eterna.png" },
+                { title: "Um lugar chamado Sonia", src: "Assets/MeuCaminhoIA/5 - Um lugar chamado Sonia.mp3", trackArt: "Assets/MeuCaminhoIA/5 - Um lugar chamado Sonia.png" },
+                { title: "Manolos", src: "Assets/MeuCaminhoIA/6 - Manolos.mp3", trackArt: "Assets/MeuCaminhoIA/6 - Manolos.png" },
+                { title: "Obrigado Perdão e Cuida", src: "Assets/MeuCaminhoIA/7 - Obrigado Perdão e Cuida.mp3", trackArt: "Assets/MeuCaminhoIA/7 - Obrigado Perdão e Cuida.png" },
+                { title: "Persistindo em Fé", src: "Assets/MeuCaminhoIA/8 - Persistindo em Fé.mp3", trackArt: "Assets/MeuCaminhoIA/8 - Persistindo em Fé.png" },
+                { title: "Pedro Bryan Bônus", src: "Assets/MeuCaminhoIA/9 - Pedro Bryan Bônus.mp3", trackArt: "Assets/MeuCaminhoIA/9 - Pedro Bryan Bônus.png" },
+                { title: "Pedro James Brown Bõnus", src: "Assets/MeuCaminhoIA/10 - Pedro James Brown Bõnus.mp3", trackArt: "Assets/MeuCaminhoIA/10 - Pedro James Brown Bõnus.png" }
+            ]
+        },
+        {
+            name: "Meu Tipo de Garota",
+            coverImg: "Assets/MeuTipodeGarota/capadiscoARTINVOCCAL.png",
+            bolachaImg: "Assets/MeuTipodeGarota/bolachameutipodegarota.png",
+            topoImg: "Assets/MeuTipodeGarota/TopoMEUTIPODEGAROTA.png",
+            tracks: [
+                { title: "1 - Meu Tipo de Garota", src: "Assets/MeuTipodeGarota/1 - Meu Tipo de Garota.mp3", trackArt: "Assets/MeuTipodeGarota/1 - Meu Tipo de Garota.png" },
+                { title: "2 - Mamãe", src: "Assets/MeuTipodeGarota/2 - Mamãe.mp3", trackArt: "Assets/MeuTipodeGarota/2 - Mamãe.png" },
+                { title: "3 - Alguém que eu amo", src: "Assets/MeuTipodeGarota/3 - Alguém que eu amo.mp3", trackArt: "Assets/MeuTipodeGarota/3 - Alguém que eu amo.png" },
+                { title: "4 - Meu Deus", src: "Assets/MeuTipodeGarota/4 - Meu Deus.mp3", trackArt: "Assets/MeuTipodeGarota/4 - Meu Deus.png" },
+                { title: "5 - Teu Olhar", src: "Assets/MeuTipodeGarota/5 - Teu Olhar.mp3", trackArt: "Assets/MeuTipodeGarota/5 - Teu Olhar.png" },
+                { title: "6 - Pai Nosso", src: "Assets/MeuTipodeGarota/6 - Pai Nosso.mp3", trackArt: "Assets/MeuTipodeGarota/6 - Pai Nosso.png" },
+                { title: "7 - Happy Day", src: "Assets/MeuTipodeGarota/7 - Happy Day.mp3", trackArt: "Assets/MeuTipodeGarota/7 - Happy Day.png" },
+                { title: "8 - Marcha Nupcial (bônus)", src: "Assets/MeuTipodeGarota/8 - Marcha Nupcial (bônus).mp3", trackArt: "Assets/MeuTipodeGarota/8 - Marcha Nupcial (bônus).png" }
+            ]
+        },
+        {
+            name: "Setinvoz",
+            coverImg: "Assets/Setinvoz/capadiscoSETINVOZ.png",
+            bolachaImg: "Assets/Setinvoz/bolachasetinvoz.png",
+            topoImg: "Assets/Setinvoz/TopoSETINVOZ.png",
+            tracks: [
+                { title: "01 Introdução", src: "Assets/Setinvoz/01 Introdução.mp3", trackArt: "Assets/Setinvoz/01 Introdução.png" },
+                { title: "02 Quero agradecer", src: "Assets/Setinvoz/02 Quero agradecer.mp3", trackArt: "Assets/Setinvoz/02 Quero agradecer.png" },
+                { title: "03 Paz Interior", src: "Assets/Setinvoz/03 Paz Interior.mp3", trackArt: "Assets/Setinvoz/03 Paz Interior.png" },
+                { title: "04 Aprendizado", src: "Assets/Setinvoz/04 Aprendizado.mp3", trackArt: "Assets/Setinvoz/04 Aprendizado.png" },
+                { title: "05 Razão", src: "Assets/Setinvoz/05 Razão.mp3", trackArt: "Assets/Setinvoz/05 Razão.png" },
+                { title: "06 Prece Musical", src: "Assets/Setinvoz/06 Prece Musical.mp3", trackArt: "Assets/Setinvoz/06 Prece Musical.png" },
+                { title: "07 Viúva de Naim", src: "Assets/Setinvoz/07 Viúva de Naim.mp3", trackArt: "Assets/Setinvoz/07 Viúva de Naim.png" },
+                { title: "08 Sou feliz - Vinheta", src: "Assets/Setinvoz/08 Sou feliz - Vinheta.mp3", trackArt: "Assets/Setinvoz/08 Sou feliz - Vinheta.png" },
+                { title: "09 Oh Vem Emanuel", src: "Assets/Setinvoz/09 Oh Vem Emanuel.mp3", trackArt: "Assets/Setinvoz/09 Oh Vem Emanuel.png" },
+                { title: "10 Graça excelsa", src: "Assets/Setinvoz/10 Graça excelsa.mp3", trackArt: "Assets/Setinvoz/10 Graça excelsa.png" },
+                { title: "11 Samba pra DEUS", src: "Assets/Setinvoz/11 Samba pra DEUS.mp3", trackArt: "Assets/Setinvoz/11 Samba pra DEUS.png" },
+                { title: "12 De Ti eu quero ser", src: "Assets/Setinvoz/12 De Ti eu quero ser.mp3", trackArt: "Assets/Setinvoz/12 De Ti eu quero ser.png" },
+                { title: "13 Ele exaltado", src: "Assets/Setinvoz/13 Ele exaltado.mp3", trackArt: "Assets/Setinvoz/13 Ele exaltado.png" }
+            ]
+        }
     ];
 
     // Função para formatar o tempo (ex: 03:45)
@@ -46,147 +95,243 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${formattedMinutes}:${formattedSeconds}`;
     }
 
+    // Função para exibir as capas dos álbuns
+    function displayAlbums() {
+        albumListElement.innerHTML = ''; // Limpa a lista atual
+        albums.forEach((album, index) => {
+            const albumItem = document.createElement('div');
+            albumItem.classList.add('album-item');
+            albumItem.dataset.albumIndex = index; // Armazena o índice do álbum
+
+            const albumCoverImg = document.createElement('img');
+            albumCoverImg.src = album.coverImg;
+            albumCoverImg.alt = `Capa do Álbum: ${album.name}`;
+
+            const albumName = document.createElement('p');
+            albumName.textContent = album.name;
+
+            albumItem.appendChild(albumCoverImg);
+            albumItem.appendChild(albumName);
+
+            // Adiciona evento de clique para selecionar o álbum
+            albumItem.addEventListener('click', () => {
+                selectAlbum(index);
+            });
+
+            albumListElement.appendChild(albumItem);
+        });
+    }
+
+    // Função para selecionar um álbum e exibir sua playlist
+    function selectAlbum(albumIndex) {
+        // Pausa a música atual se houver
+        audioPlayer.pause();
+        if (currentAlbumArtElement) {
+            currentAlbumArtElement.classList.remove('spinning'); // Remove a animação de giro
+        }
+        playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Volta para o ícone de play
+
+        currentAlbum = albums[albumIndex]; // Define o álbum atual
+        currentTrackIndex = -1; // Reseta o índice da faixa
+        audioPlayer.src = ''; // Limpa a fonte do áudio
+        currentSongTitleElement.textContent = "No Track Playing"; // Reseta o título
+        currentTimeElement.textContent = "00:00"; // Reseta o tempo
+        durationElement.textContent = "00:00"; // Reseta a duração
+        progressBar.value = 0; // Reseta a barra de progresso
+
+
+        // Atualiza as imagens principais para as do álbum selecionado
+        if (mainAlbumCoverElement) {
+             mainAlbumCoverElement.src = currentAlbum.topoImg;
+             mainAlbumCoverElement.alt = `Imagem Principal: ${currentAlbum.name}`;
+        }
+        if (currentAlbumArtElement) {
+             currentAlbumArtElement.src = currentAlbum.bolachaImg; // Define a bolacha do álbum
+             currentAlbumArtElement.alt = `Bolacha do Álbum: ${currentAlbum.name}`;
+             // A animação de giro só é adicionada quando a música começa a tocar (na função playTrack)
+        }
+
+        // Atualiza a classe 'selected' na capa do álbum
+        const albumItems = albumListElement.querySelectorAll('.album-item');
+        albumItems.forEach((item, i) => {
+            if (i === albumIndex) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+
+
+        updatePlaylistDisplay(); // Exibe as músicas do álbum selecionado
+
+        // Não ocultamos mais a área de seleção de álbuns
+        // albumSelectionArea.style.display = 'none';
+        // playlistArea.style.display = 'block'; // A área da playlist já está visível
+    }
+
+
     // Função para carregar e (opcionalmente) tocar uma faixa específica
     function loadTrack(index, autoPlay = true) {
-        if (index >= 0 && index < playlist.length) {
+        // Usa a lista de tracks do álbum atualmente selecionado
+        if (currentAlbum && index >= 0 && index < currentAlbum.tracks.length) {
             currentTrackIndex = index;
-            audioPlayer.src = playlist[currentTrackIndex].src;
-            currentSongTitleElement.textContent = playlist[currentTrackIndex].title;
+            const track = currentAlbum.tracks[currentTrackIndex];
+            audioPlayer.src = track.src;
+            currentSongTitleElement.textContent = track.title;
 
-            // Define a capa principal grande como a capa do álbum da música
-            // REMOVIDO: Não definimos mais a capa principal aqui, ela é fixa no HTML
-            // if (mainAlbumCoverElement) {
-            //      mainAlbumCoverElement.src = playlist[currentTrackIndex].albumArt || ''; // Define a capa da música no topo
-            //      mainAlbumCoverElement.alt = `Capa do Álbum: ${playlist[currentTrackIndex].title}`;
-            // } else {
-            //      console.error("Elemento com ID 'main-album-cover' não encontrado.");
-            // }
-
-            // Define a capa giratória menor como a capa do álbum da música
-            if (currentAlbumArtElement) {
-                 currentAlbumArtElement.src = playlist[currentTrackIndex].albumArt || ''; // Define a capa da música, padrão vazio se não houver
-                 currentAlbumArtElement.alt = `Capa do Álbum: ${playlist[currentTrackIndex].title}`;
-            } else {
-                 console.error("Elemento com ID 'current-album-art' não encontrado.");
+            // Define a capa giratória menor como a bolacha do álbum (garante que seja a do álbum atual)
+            if (currentAlbumArtElement && currentAlbum) {
+                 currentAlbumArtElement.src = currentAlbum.bolachaImg; // Usa a bolacha do álbum
+                 currentAlbumArtElement.alt = `Bolacha do Álbum: ${currentAlbum.name}`;
             }
 
-
-            // Remove a classe 'active' de todos os itens da lista
-            playlistElement.querySelectorAll('li').forEach((item) => {
-                item.classList.remove('active');
+            // Atualiza a classe 'active' na lista de músicas
+            const playlistItems = playlistElement.querySelectorAll('li');
+            playlistItems.forEach((item, i) => {
+                if (i === currentTrackIndex) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
             });
 
-            // Adiciona a classe 'active' ao item da lista atual
-            const currentItem = playlistElement.querySelector(`li[data-index="${currentTrackIndex}"]`);
-            if (currentItem) {
-                currentItem.classList.add('active');
-            }
-
-            audioPlayer.load(); // Carrega a nova faixa
-
-            // Resetar a barra de progresso ao carregar uma nova faixa
-            if (progressBar) {
-                progressBar.value = 0;
-            }
+            // Carrega a música. O autoplay é controlado pela função playTrack/togglePlayPause
+            audioPlayer.load(); // Garante que o áudio seja carregado para obter a duração
 
             if (autoPlay) {
-                 // A reprodução será iniciada no evento 'loadedmetadata'
-                 // para garantir que a duração esteja disponível.
-                 // Se o navegador bloquear o autoplay, o usuário precisará clicar no play.
+                // A reprodução é iniciada pela função playTrack ou togglePlayPause
+                // Não chamamos audioPlayer.play() diretamente aqui
+            } else {
+                 // Garante que a bolacha não esteja girando se não for tocar automaticamente
+                 if (currentAlbumArtElement) {
+                    currentAlbumArtElement.classList.remove('spinning');
+                 }
             }
-
         } else {
-            // Lida com o caso em que o índice está fora dos limites (ex: fim da playlist)
-            currentTrackIndex = -1; // Reseta o índice
-            currentSongTitleElement.textContent = "No Track Playing";
-            currentAlbumArtElement.src = ""; // Limpa a capa
-            currentAlbumArtElement.alt = "Capa do Álbum";
-            playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Reseta o ícone do botão
-            currentAlbumArtElement.classList.remove('spinning'); // Para a animação de giro
-            currentTimeElement.textContent = '00:00'; // Reseta a exibição do tempo atual
-            durationElement.textContent = '00:00'; // Reseta a exibição da duração
-            audioPlayer.removeAttribute('src'); // Limpa a fonte de áudio
-            audioPlayer.load(); // Carrega fonte vazia para resetar o player
-             // Remove a classe 'active' de todos os itens da lista
-            playlistElement.querySelectorAll('li').forEach((item) => {
-                item.classList.remove('active');
-            });
-            // Reseta a barra de progresso
-            if (progressBar) {
-                progressBar.value = 0;
-                progressBar.max = 100; // Volta para um valor padrão
-            }
+            console.error("Índice de faixa inválido ou nenhum álbum selecionado.");
+            // Opcional: Limpar a playlist ou mostrar mensagem
+            updatePlaylistDisplay(); // Limpa a lista se o álbum for inválido
         }
     }
 
-    // Função para tocar a faixa atual
+    // Função para tocar a música atual
     function playTrack() {
-         if (audioPlayer.src) { // Só toca se uma fonte estiver definida
+        if (audioPlayer.src) { // Verifica se há uma fonte de áudio carregada
             audioPlayer.play();
-         } else if (playlist.length > 0) { // Se não houver fonte, mas a playlist existir, carrega a primeira faixa
-             loadTrack(0);
-             // A reprodução começará após loadedmetadata
-         }
+            playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Muda para ícone de pause
+            if (currentAlbumArtElement) {
+                currentAlbumArtElement.classList.add('spinning'); // Adiciona a animação de giro
+            }
+        } else if (currentAlbum && currentAlbum.tracks.length > 0) {
+             // Se não há fonte mas há um álbum selecionado, carrega e toca a primeira faixa
+             loadTrack(0, true); // Carrega a primeira faixa e tenta tocar
+             // playTrack será chamada novamente após loadTrack carregar a fonte
+        } else {
+             console.warn("Nenhuma faixa carregada ou álbum selecionado para tocar.");
+        }
     }
 
-    // Função para pausar a faixa atual
+    // Função para pausar a música atual
     function pauseTrack() {
         audioPlayer.pause();
+        playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Volta para ícone de play
+        if (currentAlbumArtElement) {
+            currentAlbumArtElement.classList.remove('spinning'); // Remove a animação de giro
+        }
     }
 
-    // Função para parar a faixa atual
+    // Função para parar a música
     function stopTrack() {
         audioPlayer.pause();
-        audioPlayer.currentTime = 0; // Reseta o tempo para o início
-        playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Reseta o ícone do botão
-        currentAlbumArtElement.classList.remove('spinning'); // Para a animação de giro
-        currentTimeElement.textContent = '00:00'; // Reseta a exibição do tempo atual
+        audioPlayer.currentTime = 0; // Volta para o início
+        playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Volta para ícone de play
+        if (currentAlbumArtElement) {
+            currentAlbumArtElement.classList.remove('spinning'); // Remove a animação de giro
+        }
+        // Opcional: Manter a capa e bolacha do álbum selecionado ou voltar para as principais
+        // Para manter as do álbum selecionado, não faça nada aqui.
+        // Para voltar para as principais:
+        // if (mainAlbumCoverElement) mainAlbumCoverElement.src = "Assets/CapaPRINCIPAL.png";
+        // if (currentAlbumArtElement) currentAlbumArtElement.src = "Assets/BolachaPRINCIPAL.png";
+        // currentSongTitleElement.textContent = "No Track Playing";
+        // currentTimeElement.textContent = "00:00";
+        // durationElement.textContent = "00:00";
+        // progressBar.value = 0;
+        // currentTrackIndex = -1;
+        // currentAlbum = null; // Opcional: deselecionar o álbum
+        // updatePlaylistDisplay(); // Opcional: limpar a playlist exibida
     }
+
 
     // Função para tocar a música anterior
     function playPreviousSong() {
-        if (playlist.length === 0) return;
-        const newIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
-        loadTrack(newIndex, false); // Carrega a faixa anterior, SEM autoplay dentro de loadTrack
-        playTrack(); // Inicia a reprodução explicitamente
+        if (!currentAlbum || currentAlbum.tracks.length === 0) return; // Não faz nada se não houver álbum ou músicas
+        let newIndex = currentTrackIndex - 1;
+        if (newIndex < 0) {
+            newIndex = currentAlbum.tracks.length - 1; // Volta para a última faixa
+        }
+        loadTrack(newIndex, true); // Carrega e toca a faixa anterior
+        playTrack(); // Garante que a reprodução comece
     }
 
     // Função para tocar a próxima música
     function playNextSong() {
-        if (playlist.length === 0) return;
-        const newIndex = (currentTrackIndex + 1) % playlist.length;
-        loadTrack(newIndex, false); // Carrega a próxima faixa, SEM autoplay dentro de loadTrack
-        playTrack(); // Inicia a reprodução explicitamente
+        if (!currentAlbum || currentAlbum.tracks.length === 0) return; // Não faz nada se não houver álbum ou músicas
+        let newIndex = currentTrackIndex + 1;
+        if (newIndex >= currentAlbum.tracks.length) { // Verifica se chegou ao fim do álbum
+            newIndex = 0; // Volta para a primeira faixa do álbum
+        }
+        loadTrack(newIndex, true); // Carrega e toca a próxima faixa
+        playTrack(); // Garante que a reprodução comece
     }
 
     // Função para alternar entre tocar/pausar
     function togglePlayPause() {
+        if (!currentAlbum) { // Adiciona verificação se um álbum foi selecionado
+            console.warn("Nenhum álbum selecionado para tocar.");
+            // Opcional: Mostrar uma mensagem para o usuário selecionar um álbum
+            return; // Sai da função se nenhum álbum estiver selecionado
+        }
+
         if (audioPlayer.paused || !audioPlayer.src) { // Se pausado ou sem fonte, tenta tocar
-            playTrack();
+            // Se nenhum track foi carregado ainda para o álbum atual, carrega o primeiro
+            if (currentTrackIndex === -1 && currentAlbum.tracks.length > 0) {
+                 loadTrack(0, true); // Carrega a primeira faixa e toca
+            } else if (currentTrackIndex !== -1) {
+                 // Se um track já foi carregado, apenas continua de onde parou
+                 playTrack();
+            } else {
+                 console.warn("Álbum selecionado não possui faixas.");
+            }
         } else { // Se tocando, pausa
             pauseTrack();
         }
     }
 
-    // Função para carregar e exibir a playlist na interface
-    function loadPlaylist() {
+    // Função para atualizar a exibição da playlist (agora exibe as faixas do álbum selecionado)
+    function updatePlaylistDisplay() {
         playlistElement.innerHTML = ''; // Limpa a exibição atual da playlist
-        if (playlist.length === 0) {
-            emptyPlaylistMessage.style.display = 'block'; // Mostra a mensagem de playlist vazia
-            playlistCountElement.textContent = '0 músicas';
-        } else {
+        if (currentAlbum && currentAlbum.tracks.length > 0) {
             emptyPlaylistMessage.style.display = 'none'; // Esconde a mensagem de playlist vazia
-            playlist.forEach((song, index) => {
+            currentAlbum.tracks.forEach((track, index) => { // Itera sobre as faixas do álbum atual
                 const listItem = document.createElement('li');
-                listItem.textContent = song.title;
-                listItem.setAttribute('data-index', index); // Armazena o índice para fácil acesso
+                listItem.dataset.index = index; // Armazena o índice da faixa
+                // Inclui a miniatura da capa da música (trackArt)
+                listItem.innerHTML = `<img src="${track.trackArt}" alt="Capa da Música"> <span>${track.title}</span>`;
+
                 listItem.addEventListener('click', () => {
-                    loadTrack(index, false); // Carrega a faixa clicada, desativando autoplay interno
-                    playTrack(); // Inicia a reprodução explicitamente após carregar
+                    loadTrack(index, true); // Carrega e toca a faixa clicada
+                    playTrack(); // Garante que a reprodução comece
                 });
+
                 playlistElement.appendChild(listItem);
             });
-            playlistCountElement.textContent = `${playlist.length} música${playlist.length > 1 ? 's' : ''}`;
+            playlistCountElement.textContent = `${currentAlbum.tracks.length} música${currentAlbum.tracks.length > 1 ? 's' : ''}`;
+        } else {
+            // Se nenhum álbum selecionado ou álbum sem faixas
+            playlistElement.innerHTML = ''; // Garante que a lista esteja vazia
+            emptyPlaylistMessage.style.display = 'block'; // Mostra a mensagem de playlist vazia
+            playlistCountElement.textContent = '0 músicas';
         }
     }
 
@@ -198,7 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error("Elemento com ID 'play-pause-button' não encontrado.");
     }
-
 
     // Adiciona listener ao botão stop
      if (stopButton) { // Verifica se o elemento existe
@@ -220,169 +364,19 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Elemento com ID 'next-button' não encontrado.");
     }
 
-
-    // Adiciona listener para controle de volume - REMOVIDO
-    /*
-    if (volumeSlider && volumeValueElement) { // Verifica se os elementos existem
-        volumeSlider.addEventListener('input', (event) => {
-            const volume = event.target.value;
-            audioPlayer.volume = volume;
-            volumeValueElement.textContent = `${Math.round(volume * 100)}%`;
-        });
-    } else {
-         console.error("Elementos de volume (slider ou value display) não encontrados.");
-    }
-    */
-
-
-    // Adiciona listener para controle de velocidade (se existir no HTML)
-    if (speedSlider && speedValueElement) { // Verifica se os elementos existem
-        speedSlider.addEventListener('input', (event) => {
-            const speed = parseFloat(event.target.value); // Obtém o valor como float
-            audioPlayer.playbackRate = speed;
-            // Atualiza a exibição da velocidade
-            speedValueElement.textContent = `${speed.toFixed(1)}x`; // Exibe a velocidade com uma casa decimal
-        });
-    } // Não exibe erro se os elementos de velocidade não existirem, pois são opcionais
-
-
-    // --- Listeners de Eventos do Audio Player ---
-
-    // Quando o áudio começa a tocar
-    audioPlayer.addEventListener('play', () => {
-        if (playPauseButton) {
-             playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Muda para ícone de pausa
-        }
-        if (currentAlbumArtElement) {
-            currentAlbumArtElement.classList.add('spinning'); // Adiciona classe para animação de giro
-        }
-    });
-
-    // Quando o áudio é pausado
-    audioPlayer.addEventListener('pause', () => {
-         if (playPauseButton) {
-            playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Muda para ícone de play
-         }
-         if (currentAlbumArtElement) {
-            currentAlbumArtElement.classList.remove('spinning'); // Remove classe de animação de giro
-         }
-    });
-
-    // Quando os metadados são carregados (duração, etc.)
-    audioPlayer.addEventListener('loadedmetadata', () => {
-        if (durationElement) { // Verifica se o elemento existe
-            durationElement.textContent = formatTime(audioPlayer.duration);
-        } else {
-             console.error("Elemento com ID 'duration' não encontrado.");
-        }
-
-        // Atualiza o valor máximo da barra de progresso com a duração total
-        if (progressBar) {
-            progressBar.max = audioPlayer.duration;
-        }
-
-        // REMOVE a tentativa de tocar automaticamente aqui
-        // A reprodução deve ser iniciada por interação do usuário (ex: clicar no play)
-        // ou pelas funções playTrack, playNextSong, playPreviousSong
-        // if (currentTrackIndex !== -1) {
-        //      playTrack(); // Tenta iniciar a reprodução após carregar os metadados
-        // }
-    });
-
-    // Atualiza a exibição do tempo atual enquanto a música toca
-    audioPlayer.addEventListener('timeupdate', () => {
-        if (currentTimeElement) { // Verifica se o elemento existe
-            currentTimeElement.textContent = formatTime(audioPlayer.currentTime);
-        } else {
-             console.error("Elemento com ID 'current-time' não encontrado.");
-        }
-
-        // Atualiza o valor da barra de progresso, mas apenas se o usuário NÃO estiver arrastando
-        if (progressBar && !isSeeking) {
-            progressBar.value = audioPlayer.currentTime;
-        }
-    });
-
-    // Quando o áudio termina
-    audioPlayer.addEventListener('ended', () => {
-        playNextSong(); // Toca a próxima música automaticamente (agora playNextSong chama playTrack)
-    });
-
-
-    // --- Listeners de Eventos da Barra de Progresso ---
-
-    if (progressBar) { // Verifica se o elemento existe
-        // Quando o usuário começa a arrastar o thumb (Mouse)
-        progressBar.addEventListener('mousedown', () => {
-            isSeeking = true;
-            // Lembra se a música estava tocando antes de pausar para arrastar
-            wasPlayingBeforeSeek = !audioPlayer.paused;
-            audioPlayer.pause(); // Pausa a música enquanto arrasta
-        });
-
-        // Quando o usuário solta o thumb (Mouse)
-        progressBar.addEventListener('mouseup', () => {
-            isSeeking = false;
-            audioPlayer.currentTime = progressBar.value; // Define o tempo do áudio para o valor da barra
-            // Agora verifica a flag que lembra o estado ANTES de arrastar
-            if (wasPlayingBeforeSeek) { // Se estava tocando antes de arrastar
-                 playTrack(); // Continua tocando a partir da nova posição
-            } else {
-                 // Se estava pausado, apenas atualiza o tempo exibido
-                 if (currentTimeElement) {
-                     currentTimeElement.textContent = formatTime(audioPlayer.currentTime);
-                 }
-            }
-            // Reseta a flag
-            wasPlayingBeforeSeek = false;
-        });
-
-        // --- Adicionar Listeners de Eventos de Toque para Mobile ---
-
-        // Quando o usuário começa a tocar na barra (Touch)
-        progressBar.addEventListener('touchstart', () => {
-            isSeeking = true;
-            wasPlayingBeforeSeek = !audioPlayer.paused;
-            audioPlayer.pause(); // Pausa a música enquanto arrasta
-        });
-
-        // Quando o usuário para de tocar na barra (Touch)
-        progressBar.addEventListener('touchend', () => {
-            isSeeking = false;
-            audioPlayer.currentTime = progressBar.value; // Define o tempo do áudio para o valor da barra
-            if (wasPlayingBeforeSeek) { // Se estava tocando antes de arrastar
-                 playTrack(); // Continua tocando a partir da nova posição
-            } else {
-                 if (currentTimeElement) {
-                     currentTimeElement.textContent = formatTime(audioPlayer.currentTime);
-                 }
-            }
-            wasPlayingBeforeSeek = false;
-        });
-
-        // Opcional: Atualiza o tempo exibido enquanto arrasta (sem soltar)
-        // Este listener 'input' funciona tanto para mouse quanto para touch
-        progressBar.addEventListener('input', () => {
-             if (currentTimeElement) {
-                 currentTimeElement.textContent = formatTime(progressBar.value);
-             }
-        });
-
-    } else {
-        console.error("Elemento com ID 'progress-bar' não encontrado.");
-    }
-
+    // ... existing code ...
 
     // --- Inicialização ---
 
-    // Carrega a playlist ao carregar a página
-    loadPlaylist();
+    // Ao carregar a página, exibe a lista de álbuns para seleção
+    displayAlbums();
 
-    // Opcionalmente, carrega a primeira faixa automaticamente ao carregar a página
-    // Descomente as linhas abaixo se quiser que a primeira música seja carregada
-    // (mas lembre-se da restrição de autoplay dos navegadores)
-    if (playlist.length > 0) {
-        loadTrack(0, false); // Carrega a primeira faixa, mas não tenta tocar automaticamente
-    }
+    // A playlist é exibida vazia inicialmente, pois nenhum álbum foi selecionado
+    updatePlaylistDisplay(); // Chama para mostrar a mensagem de playlist vazia
+
+    // A primeira faixa não é carregada automaticamente ao carregar a página.
+    // if (playlist.length > 0) { // REMOVIDO
+    //     loadTrack(0, false); // REMOVIDO
+    // }
 
 });
