@@ -44,7 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 { title: "Obrigado Perdão e Cuida", src: "Assets/MeuCaminhoIA/7 - Obrigado Perdão e Cuida.mp3", trackArt: "Assets/MeuCaminhoIA/7 - Obrigado Perdão e Cuida.png" },
                 { title: "Persistindo em Fé", src: "Assets/MeuCaminhoIA/8 - Persistindo em Fé.mp3", trackArt: "Assets/MeuCaminhoIA/8 - Persistindo em Fé.png" },
                 { title: "Pedro Bryan Bônus", src: "Assets/MeuCaminhoIA/9 - Pedro Bryan Bônus.mp3", trackArt: "Assets/MeuCaminhoIA/9 - Pedro Bryan Bônus.png" },
-                { title: "Pedro James Brown Bõnus", src: "Assets/MeuCaminhoIA/10 - Pedro James Brown Bõnus.mp3", trackArt: "Assets/MeuCaminhoIA/10 - Pedro James Brown Bõnus.png" }
+                { title: "Pedro James Brown Bõnus", src: "Assets/MeuCaminhoIA/10 - Pedro James Brown Bõnus.mp3", trackArt: "Assets/MeuCaminhoIA/10 - Pedro James Brown Bõnus.png" },
+                { title: "Pra Sempre Irmãs", src: "Assets/MeuCaminhoIA/11 - Pra Sempre Irmãs.mp3", trackArt: "Assets/MeuCaminhoIA/11 - Pra Sempre Irmãs.png" } // Adiciona a nova faixa aqui
             ]
         },
         {
@@ -563,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
              console.log("progressBar mouseup: Não estava tocando antes."); // Log
         }
     });
-     // Adiciona também para dispositivos touch
+    // Adiciona também para dispositivos touch
     progressBar.addEventListener('touchend', () => {
         console.log(`progressBar touchend: Finalizando seek. Definindo currentTime para ${progressBar.value}`); // Log
         isSeeking = false;
