@@ -566,15 +566,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // Adiciona também para dispositivos touch
     progressBar.addEventListener('touchend', () => {
-        console.log(`progressBar touchend: Finalizando seek. Definindo currentTime para ${progressBar.value}`); // Log
+        console.log(`progressBar touchend: Finalizando seek. Tentando definir currentTime para ${progressBar.value}`); // Log
         isSeeking = false;
         audioPlayer.currentTime = progressBar.value; // Define a posição da música para o valor da barra
         console.log(`progressBar touchend: currentTime definido para ${audioPlayer.currentTime}`); // Log para confirmar
         if (wasPlayingBeforeSeek) {
             console.log("progressBar touchend: Estava tocando antes, tentando retomar play com delay."); // Log adicionado
-             // Adiciona um pequeno delay antes de tentar tocar
+            // Adiciona um pequeno delay antes de tentar tocar
             setTimeout(() => {
-                // Tenta tocar e lida com a Promise retornada por play()
+                 // Tenta tocar e lida com a Promise retornada por play()
                 const playPromise = audioPlayer.play();
                  if (playPromise !== undefined) {
                     playPromise.then(() => {
@@ -585,39 +585,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }).catch(error => {
                         console.error("progressBar touchend: Erro ao tentar retomar play após seek (com delay):", error); // Log adicionado
-                        playPauseButton.innerHTML = '<i class="fas fa-play"></i>'; // Volta para o ícone de play
-                        if (currentAlbumArtElement) {
-                            currentAlbumArtElement.classList.remove('spinning'); // Remove a animação de giro
-                        }
+                        // Tratar o erro, talvez mostrar uma mensagem para o usuário
                     });
-                } else {
-                     // Fallback para navegadores mais antigos
-                     console.log("progressBar touchend: play() não retornou Promise (navegador antigo?) (com delay)."); // Log adicionado
-                     playPauseButton.innerHTML = '<i class="fas fa-pause"></i>'; // Assume que vai tocar
-                     if (currentAlbumArtElement) {
-                        currentAlbumArtElement.classList.add('spinning'); // Assume que vai girar
-                     }
                 }
-            }, 50); // Pequeno delay de 50ms adicionado
-        } else {
-             console.log("progressBar touchend: Não estava tocando antes."); // Log
+            }, 50); // Pequeno delay de 50ms
         }
     });
 
 
     // --- Inicialização ---
+    displayAlbums(); // Exibe as capas dos álbuns ao carregar a página
 
-    // Ao carregar a página, exibe a lista de álbuns para seleção
-    console.log("DOMContentLoaded: Exibindo álbuns na inicialização."); // Log
-    displayAlbums();
-
-    // A playlist é exibida vazia inicialmente, pois nenhum álbum foi selecionado
-    console.log("DOMContentLoaded: Atualizando exibição da playlist na inicialização."); // Log
-    updatePlaylistDisplay(); // Chama para mostrar a mensagem de playlist vazia
-
-    // A primeira faixa não é carregada automaticamente ao carregar a página.
-    // if (playlist.length > 0) { // REMOVIDO
-    //     loadTrack(0, false); // REMOVIDO
+    // Opcional: Carregar o primeiro álbum por padrão ao carregar a página
+    // if (albums.length > 0) {
+    //     selectAlbum(0);
     // }
 
-}); // Fim do DOMContentLoaded
+}); // <--- ADICIONE ESTA CHAVE DE FECHAMENTO E O PARÊNTESE/PONTO E VÍRGULA
